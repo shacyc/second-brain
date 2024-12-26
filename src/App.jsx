@@ -11,20 +11,16 @@ import LoginPage from './app/login/page'
 // import { Landing } from './app/landing/landing'
 import { firebase } from '@/firebase/Firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import Home from "./app/home/home";
 
 function App() {
   const [user, loading, error] = useAuthState(firebase.auth);
-
-  const renderContent = () => {
-    if (user) return <div>Welcome {user.displayName}</div>;
-    return <LoginPage />;
-  }
 
   if (loading) return null;
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      {user ? <div>Welcome {user.displayName}</div> : <LoginPage />}
+      {user ? <Home user={user} /> : <LoginPage />}
       {/* <LoginPage /> */}
       {/* <AnimatedTestimonials
         autoplay
