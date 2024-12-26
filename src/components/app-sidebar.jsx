@@ -1,5 +1,6 @@
 import * as React from "react"
 import {
+  BookCopy,
   BookOpen,
   Bot,
   Command,
@@ -26,6 +27,9 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
+import { KnowledgeTree } from "./knowledge/knowledge-tree"
+import { ScrollArea } from "./ui/scroll-area"
+
 const data = {
   user: {
     name: "shadcn",
@@ -34,18 +38,68 @@ const data = {
   },
   navMain: [
     {
-      title: "Playground",
+      title: "Playground Playground Playground Playground",
       url: "#",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
-          title: "History",
+          title: "History History History History",
           url: "#",
           items: [
             {
               title: "2021",
               url: "#",
+              items: [
+                {
+                  title: "January",
+                  url: "#",
+                },
+                {
+                  title: "February",
+                  url: "#",
+                },
+                {
+                  title: "March",
+                  url: "#",
+                },
+                {
+                  title: "April",
+                  url: "#",
+                },
+                {
+                  title: "May",
+                  url: "#",
+                },
+                {
+                  title: "June",
+                  url: "#",
+                },
+                {
+                  title: "July",
+                  url: "#",
+                },
+                {
+                  title: "August",
+                  url: "#",
+                },
+                {
+                  title: "September",
+                  url: "#",
+                },
+                {
+                  title: "October",
+                  url: "#",
+                },
+                {
+                  title: "November",
+                  url: "#",
+                },
+                {
+                  title: "December",
+                  url: "#",
+                }
+              ]
             },
             {
               title: "2020",
@@ -176,8 +230,9 @@ export function AppSidebar({
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
                 <div
-                  className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Command className="size-4" />
+                  className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
+                >
+                  <BookCopy className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">Acme Inc</span>
@@ -189,9 +244,12 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <ScrollArea className="size-full">
+          <KnowledgeTree />
+          <NavMain items={data.navMain} />
+          <NavProjects projects={data.projects} />
+          <NavSecondary items={data.navSecondary} className="mt-auto" />
+        </ScrollArea>
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
