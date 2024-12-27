@@ -1,6 +1,7 @@
 import { GalleryVerticalEnd } from "lucide-react"
 
 import { LoginForm } from "@/components/login-form"
+import { IconAppleFilled } from "@tabler/icons-react";
 
 export default function LoginPage() {
   return (
@@ -10,7 +11,7 @@ export default function LoginPage() {
           <a href="#" className="flex items-center gap-2 font-medium">
             <div
               className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900">
-              <GalleryVerticalEnd className="size-4" />
+              <IconAppleFilled className="size-5" />
             </div>
             Second Brain
           </a>

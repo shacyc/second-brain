@@ -2,6 +2,8 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth, GoogleAuthProvider, FacebookAuthProvider } from "firebase/auth";
+import { FirebaseService } from "./firebase-service";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -17,10 +19,12 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app)
+
+// Initialize Firebase Analytics
+// const analytics = getAnalytics(app)
 
 // Initialize Firestore
-// const firebaseDb = getFirestore(firebaseApp)
+const firestoreDb = getFirestore(app)
 
 // Set up providers
 const googleProvider = new GoogleAuthProvider();
@@ -30,11 +34,24 @@ const facebookProvider = new FacebookAuthProvider();
 // Initialize Firebase Auth
 const auth = getAuth(app);
 
+// logout
+const logout = async () => {
+    try {
+        await auth.signOut();
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+const services = new FirebaseService(firestoreDb);
+
 export const firebase = {
     app,
-    analytics,
+    // analytics,
     // firebaseDb,
     auth,
     googleProvider,
     facebookProvider,
+    logout,
+    services: services
 };

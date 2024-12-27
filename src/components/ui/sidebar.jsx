@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva } from "class-variance-authority";
-import { PanelLeft } from "lucide-react"
+import { PanelLeft, ChevronRight } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -16,6 +16,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -591,6 +597,45 @@ const SidebarMenuSubButton = React.forwardRef(
 )
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton"
 
+const SidebarMenuGroup = React.forwardRef(({ title, items, ...props }, ref) => {
+
+  const renderItem = (item) =>
+    <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild tooltip={item.title}>
+          <a href={item.url}>
+            {item.icon && <item.icon />}
+            <span>{item.title}</span>
+          </a>
+        </SidebarMenuButton>
+        {item.items?.length ? (
+          <>
+            <CollapsibleTrigger asChild>
+              <SidebarMenuAction className="data-[state=open]:rotate-90">
+                <ChevronRight />
+                <span className="sr-only">Toggle</span>
+              </SidebarMenuAction>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <SidebarMenuSub>
+                {item.items?.map((subItem) => renderItem(subItem))}
+              </SidebarMenuSub>
+            </CollapsibleContent>
+          </>
+        ) : null}
+      </SidebarMenuItem>
+    </Collapsible>
+
+  return (
+    (<SidebarGroup>
+      {title && <SidebarGroupLabel>{title}</SidebarGroupLabel>}
+      <SidebarMenu>
+        {items.map((item) => renderItem(item))}
+      </SidebarMenu>
+    </SidebarGroup>)
+  );
+})
+
 export {
   Sidebar,
   SidebarContent,
@@ -615,5 +660,6 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
+  SidebarMenuGroup,
   useSidebar,
 }

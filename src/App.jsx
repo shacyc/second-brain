@@ -1,17 +1,11 @@
-// import { useState } from 'react'
-// import { Button } from "@/components/ui/button"
+import { lazy, Suspense } from "react";
 import { ThemeProvider } from "@/components/theme-provider"
 import './App.css'
-// import { ModeToggle } from '@/components/ui/mode-toggle'
-import LoginPage from './app/login/page'
-// import { AnimatedTestimonials } from '@/components/ui/animated-testimonials'
-// import AnimatedShinyText from './components/ui/animated-shiny-text'
-// import { ArrowRightIcon } from 'lucide-react'
-// import { cn } from './lib/utils'
-// import { Landing } from './app/landing/landing'
-import { firebase } from '@/firebase/Firebase';
+import { firebase } from '@/firebase/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import Home from "./app/home/home";
+
+const LoginPage = lazy(() => import('./app/login/login'));
+const Home = lazy(() => import("./app/home/home"));
 
 function App() {
   const [user, loading, error] = useAuthState(firebase.auth);
@@ -20,7 +14,15 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      {user ? <Home user={user} /> : <LoginPage />}
+      {user
+        ? <Suspense>
+          <Home user={user} />
+        </Suspense>
+        : <Suspense>
+          <LoginPage />
+        </Suspense>
+      }
+
       {/* <LoginPage /> */}
       {/* <AnimatedTestimonials
         autoplay

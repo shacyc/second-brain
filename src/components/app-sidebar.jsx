@@ -1,9 +1,7 @@
 import * as React from "react"
 import {
-  BookCopy,
   BookOpen,
   Bot,
-  Command,
   Frame,
   LifeBuoy,
   Map,
@@ -26,9 +24,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-
-import { KnowledgeTree } from "./knowledge/knowledge-tree"
 import { ScrollArea } from "./ui/scroll-area"
+import { IconAppleFilled } from "@tabler/icons-react"
+import UserNotes from "./user-notes/user-notes"
 
 const data = {
   user: {
@@ -45,14 +43,17 @@ const data = {
       items: [
         {
           title: "History History History History",
+          icon: SquareTerminal,
           url: "#",
           items: [
             {
               title: "2021",
+              icon: SquareTerminal,
               url: "#",
               items: [
                 {
                   title: "January",
+                  icon: SquareTerminal,
                   url: "#",
                 },
                 {
@@ -232,11 +233,11 @@ export function AppSidebar({
                 <div
                   className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
                 >
-                  <BookCopy className="size-4" />
+                  <IconAppleFilled className="size-6" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-semibold">Second Brain</span>
+                  <span className="truncate text-xs">Knowledge Hub</span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -245,7 +246,7 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <ScrollArea className="size-full">
-          <KnowledgeTree />
+          <UserNotes user={user} />
           <NavMain items={data.navMain} />
           <NavProjects projects={data.projects} />
           <NavSecondary items={data.navSecondary} className="mt-auto" />

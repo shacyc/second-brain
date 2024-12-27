@@ -14,36 +14,42 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
+import { useEffect, useMemo } from "react";
+
 export default function Home({ user }) {
 
+  useEffect(() => {
+    console.log("Home useEffect", + new Date());
+  }, []);
 
-  const getInitials = (name) => {
-    if (!name) return '';
-
-    const parts = name.trim().split(/\s+/); // Splits by any whitespace
-    let initials = parts[0].charAt(0).toUpperCase(); // First initial
-
-    if (parts.length > 1) {
-      initials += parts[parts.length - 1].charAt(0).toUpperCase(); // Last initial
-    }
-
-    return initials.substring(0, 2); // Ensure max 2 characters
-  }
-
-  const prepareUser = () => {
+  const preparedUser = useMemo(() => {
     if (!user) return null;
 
+    const getInitials = (name) => {
+      if (!name) return '';
+
+      const parts = name.trim().split(/\s+/); // Splits by any whitespace
+      let initials = parts[0].charAt(0).toUpperCase(); // First initial
+
+      if (parts.length > 1) {
+        initials += parts[parts.length - 1].charAt(0).toUpperCase(); // Last initial
+      }
+
+      return initials.substring(0, 2); // Ensure max 2 characters
+    }
+
     return {
+      uid: user.uid,
       name: user.displayName,
       email: user.email,
       avatar: user.avatar,
       avatarFallback: getInitials(user.displayName),
     };
-  }
+  }, [user]);
 
   return (
     (<SidebarProvider>
-      <AppSidebar user={prepareUser()} />
+      <AppSidebar user={preparedUser} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 px-4">
