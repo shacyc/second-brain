@@ -39,7 +39,7 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
 
-  return (
+  return user && (
     (<SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>

@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva } from "class-variance-authority";
-import { PanelLeft, ChevronRight } from "lucide-react"
+import { PanelLeft, ChevronRight, ScrollText } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -22,6 +22,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import { NavLink } from "react-router";
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -447,6 +448,7 @@ const SidebarMenuButton = React.forwardRef((
     variant = "default",
     size = "default",
     tooltip,
+    onClick,
     className,
     ...props
   },
@@ -462,6 +464,7 @@ const SidebarMenuButton = React.forwardRef((
       data-size={size}
       data-active={isActive}
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+      onClick={onClick}
       {...props} />
   )
 
@@ -488,7 +491,59 @@ const SidebarMenuButton = React.forwardRef((
 })
 SidebarMenuButton.displayName = "SidebarMenuButton"
 
-const SidebarMenuAction = React.forwardRef(({ className, asChild = false, showOnHover = false, ...props }, ref) => {
+const SidebarMenuNavLink = React.forwardRef((
+  {
+    asChild = false,
+    isActive = false,
+    variant = "default",
+    size = "default",
+    tooltip,
+    onClick,
+    className,
+    ...props
+  },
+  ref
+) => {
+  const { isMobile, state } = useSidebar()
+
+  const button = (
+    <NavLink
+      ref={ref}
+      data-sidebar="menu-button"
+      data-size={size}
+      data-active={isActive}
+      className={({ isActive }) => cn(
+        sidebarMenuButtonVariants({ variant, size }),
+        isActive ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground" : "",
+        className)}
+      onClick={onClick}
+      {...props} />
+  )
+
+  if (!tooltip) {
+    return button
+  }
+
+  if (typeof tooltip === "string") {
+    tooltip = {
+      children: tooltip,
+    }
+  }
+
+  return (
+    (<Tooltip>
+      <TooltipTrigger asChild>{button}</TooltipTrigger>
+      <TooltipContent
+        side="right"
+        align="center"
+        hidden={state !== "collapsed" || isMobile}
+        {...tooltip} />
+    </Tooltip>)
+  );
+})
+SidebarMenuButton.displayName = "SidebarMenuButton"
+
+const SidebarMenuAction = React.forwardRef(({ className, asChild = false, showOnHover = false, position = "right", ...props }, ref) => {
   const Comp = asChild ? Slot : "button"
 
   return (
@@ -496,7 +551,7 @@ const SidebarMenuAction = React.forwardRef(({ className, asChild = false, showOn
       ref={ref}
       data-sidebar="menu-action"
       className={cn(
-        "absolute right-1 top-1.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 peer-hover/menu-button:text-sidebar-accent-foreground [&>svg]:size-4 [&>svg]:shrink-0",
+        "top-1.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 peer-hover/menu-button:text-sidebar-accent-foreground [&>svg]:size-4 [&>svg]:shrink-0",
         // Increases the hit area of the button on mobile.
         "after:absolute after:-inset-2 after:md:hidden",
         "peer-data-[size=sm]/menu-button:top-1",
@@ -505,6 +560,7 @@ const SidebarMenuAction = React.forwardRef(({ className, asChild = false, showOn
         "group-data-[collapsible=icon]:hidden",
         showOnHover &&
         "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0",
+        position === "right" && "absolute right-1",
         className
       )}
       {...props} />)
@@ -599,15 +655,48 @@ SidebarMenuSubButton.displayName = "SidebarMenuSubButton"
 
 const SidebarMenuGroup = React.forwardRef(({ title, items, ...props }, ref) => {
 
+  const MenuButtonRenderer = ({ item, children }) => {
+    if (item.url && item.url !== "#") {
+      return <NavLink
+        to={item.url}
+        className={({ isActive }) => cn(
+          isActive && "[&>span]:bg-sidebar-accent [&>span]:font-medium [&>span]:text-sidebar-accent-foreground",
+          "[&_.toggle-icon]:hover:block",
+          "[&_.note-icon]:hover:hidden",
+        )}
+      >
+        <SidebarMenuButton size="sm" asChild tooltip={item.title}>
+          <span >
+            <CollapsibleTrigger asChild>
+              <SidebarMenuAction
+                className="[&_.toggle-icon]:data-[state=open]:rotate-90"
+                position="left"
+              >
+                <ChevronRight className="toggle-icon hidden" />
+                {item.icon ? <item.icon className="note-icon" /> : <ScrollText className="note-icon" />}
+                <span className="sr-only">Toggle</span>
+              </SidebarMenuAction>
+            </CollapsibleTrigger>
+            {/* {item.icon ? <item.icon /> : <ScrollText />} */}
+            <span>{item.title}</span>
+          </span>
+        </SidebarMenuButton>
+      </NavLink>
+    } else {
+      return <SidebarMenuButton asChild tooltip={item.title}>
+        <a href={item.url}>
+          {item.icon && <item.icon />}
+          <span>{item.title}</span>
+        </a>
+      </SidebarMenuButton>;
+    }
+  }
+
   const renderItem = (item) =>
     <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
       <SidebarMenuItem>
-        <SidebarMenuButton asChild tooltip={item.title}>
-          <a href={item.url}>
-            {item.icon && <item.icon />}
-            <span>{item.title}</span>
-          </a>
-        </SidebarMenuButton>
+        <MenuButtonRenderer item={item}>
+        </MenuButtonRenderer>
         {item.items?.length ? (
           <>
             <CollapsibleTrigger asChild>

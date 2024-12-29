@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { firebase } from '@/firebase/firebase';
 import { signInWithPopup } from "firebase/auth";
+import { useNavigate } from "react-router";
 
 export function LoginForm({
   className,
@@ -14,9 +15,14 @@ export function LoginForm({
   ...props
 }) {
 
+  const navigate = useNavigate();
+
   const signInWithGoogle = async () => {
     try {
       await signInWithPopup(firebase.auth, firebase.googleProvider);
+
+      navigate("/");
+
       console.log("User signed in with Google");
     } catch (error) {
       console.error("Error signing in with Google", error);
@@ -91,7 +97,7 @@ export function LoginForm({
   return (
     (<form className={cn("flex flex-col gap-6", className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Login to your account</h1>
+        <h1 className="text-2xl font-bold">Login to your second brain</h1>
         <p className="text-balance text-sm text-zinc-500 dark:text-zinc-400">
           Login with your Apple or Google account
         </p>
