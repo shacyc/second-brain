@@ -5,6 +5,9 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { NoteFeatures } from "./note-features";
 import { firebase } from "@/firebase/firebase";
+import { Button } from "@/components/ui/button";
+import { PanelLeft } from "lucide-react";
+import { CommonFunction } from "@/lib/common-function";
 
 export default function Note() {
     const { noteId } = useParams();
@@ -12,9 +15,11 @@ export default function Note() {
 
     useEffect(() => {
         const getNode = async () => {
-            let note = firebase.services.notes.get(noteId)
-            if (note) {
-                setNote(note);
+            if (noteId) {
+                let note = firebase.services.notes.get(noteId)
+                if (note) {
+                    setNote(note);
+                }
             }
         }
 
@@ -24,7 +29,17 @@ export default function Note() {
     return !noteId ? <NoteFeatures /> : (<>
         <header className="flex h-16 shrink-0 items-center gap-2">
             <div className="flex items-center gap-2 px-4">
-                <SidebarTrigger className="-ml-1" />
+                {/* <SidebarTrigger className="-ml-1" /> */}
+                <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7 -ml-1"
+                    onClick={() => {
+                        CommonFunction.eventBus.dispatch("toggle-sidebar");
+                    }}
+                >
+                    <PanelLeft />
+                </Button>
                 <Separator orientation="vertical" className="mr-2 h-4" />
                 <Breadcrumb>
                     <BreadcrumbList>

@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuAction, SidebarMenuButton, SidebarMenuGroup, SidebarMenuItem } from "../ui/sidebar";
 import { firebase } from "@/firebase/firebase";
-import { MoreHorizontal, PlusIcon, SquarePenIcon } from "lucide-react";
+import { MoreHorizontal, PlusIcon, ScrollText, SquarePenIcon } from "lucide-react";
 import { CommonFunction } from "@/lib/common-function";
 import { useNavigate } from "react-router";
+import { SidebarMenu, SidebarTitle } from "../ui/sidebar-menu";
 
 export default function UserNotes({ user }) {
     const [userNotes, setUserNotes] = useState(null);
@@ -76,7 +76,7 @@ export default function UserNotes({ user }) {
         let _userNotes = structuredClone(userNotes);
         _userNotes = CommonFunction.recursive(_userNotes, (note, parentNote, breakFn) => {
             if (!note.title) note.title = "New note New note New note New note New note";
-            note.href = "#";
+            note.key = note.id;
             note.url = `/${note.id}`;
             return note;
         }, { childrenProp: "items" });
@@ -84,60 +84,94 @@ export default function UserNotes({ user }) {
     }, [userNotes]);
 
     return userNotes && (<>
-        <SidebarGroup>
-            <SidebarGroupContent>
-                <SidebarMenu>
-                    {[
-                        {
-                            title: "Create a new note",
-                            url: "#",
-                            icon: SquarePenIcon,
-                            onClick: (e => {
-                                e.stopPropagation();
-                                createNote();
-                            })
-                        },
-
-                    ].map((item) => (
-                        <SidebarMenuItem key={item.title}>
-                            <SidebarMenuButton asChild size="sm" onClick={item.onClick}>
-                                <a href={item.url}>
-                                    {item.icon && <item.icon />}
-                                    <span>{item.title}</span>
-                                </a>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    ))}
-                </SidebarMenu>
-            </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarMenuGroup
-            title={userNotes.length > 0 ? "Notes" : "No notes"}
-            items={preparedUserNotes}
-            itemActionsHoverClassName="pr-14"
-            itemActions={(item) => <>
-                <SidebarMenuAction
-                    position="left"
-                    onClick={(e) => {
-                        e.preventDefault();
+        <SidebarMenu
+            menu={{
+                items: [{
+                    key: "create-note",
+                    title: "New note",
+                    icon: SquarePenIcon,
+                    onClick: (e => {
                         e.stopPropagation();
-                    }}
-                >
-                    <MoreHorizontal className="opacity-50" />
-                </SidebarMenuAction>
-                <SidebarMenuAction
-                    position="left"
-                    onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        createNote(item.id);
-                    }}
-                >
-                    <PlusIcon className="opacity-50" />
-                </SidebarMenuAction>
-            </>}
-        />
+                        createNote();
+                    })
+                }],
+            }}
+            className="mt-2"
+        ></SidebarMenu>
 
-    </>);
+        <SidebarTitle>
+            {userNotes.length > 0 ? "Notes" : "No notes"}
+        </SidebarTitle>
+
+        <SidebarMenu
+            menu={{
+                items: preparedUserNotes,
+                icon: ScrollText,
+                onClick: (item) => {
+                    navigate(item.url);
+                }
+            }}
+            childrenProperty="items"
+            showEmptyChildren
+            indentSize="sm"
+        ></SidebarMenu>
+    </>)
+
+    // return userNotes && (<>
+    //     <SidebarGroup>
+    //         <SidebarGroupContent>
+    //             <SidebarMenu>
+    //                 {[
+    //                     {
+    //                         title: "Create a new note",
+    //                         url: "#",
+    //                         icon: SquarePenIcon,
+    //                         onClick: (e => {
+    //                             e.stopPropagation();
+    //                             createNote();
+    //                         })
+    //                     },
+
+    //                 ].map((item) => (
+    //                     <SidebarMenuItem key={item.title}>
+    //                         <SidebarMenuButton asChild size="sm" onClick={item.onClick}>
+    //                             <a href={item.url}>
+    //                                 {item.icon && <item.icon />}
+    //                                 <span>{item.title}</span>
+    //                             </a>
+    //                         </SidebarMenuButton>
+    //                     </SidebarMenuItem>
+    //                 ))}
+    //             </SidebarMenu>
+    //         </SidebarGroupContent>
+    //     </SidebarGroup>
+
+    //     <SidebarMenuGroup
+    //         title={userNotes.length > 0 ? "Notes" : "No notes"}
+    //         items={preparedUserNotes}
+    //         itemActionsHoverClassName="pr-14"
+    //         itemActions={(item) => <>
+    //             <SidebarMenuAction
+    //                 position="left"
+    //                 onClick={(e) => {
+    //                     e.preventDefault();
+    //                     e.stopPropagation();
+    //                 }}
+    //             >
+    //                 <MoreHorizontal className="opacity-50" />
+    //             </SidebarMenuAction>
+    //             <SidebarMenuAction
+    //                 position="left"
+    //                 onClick={(e) => {
+    //                     e.preventDefault();
+    //                     e.stopPropagation();
+    //                     createNote(item.id);
+    //                 }}
+    //             >
+    //                 <PlusIcon className="opacity-50" />
+    //             </SidebarMenuAction>
+    //         </>}
+    //     />
+
+    // </>);
 }

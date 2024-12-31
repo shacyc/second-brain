@@ -2,8 +2,10 @@ import * as React from "react"
 import {
   BookOpen,
   Bot,
+  ChevronDown,
   Frame,
   LifeBuoy,
+  LogOut,
   Map,
   PieChart,
   Send,
@@ -27,6 +29,10 @@ import {
 import { ScrollArea } from "./ui/scroll-area"
 import { IconAppleFilled } from "@tabler/icons-react"
 import UserNotes from "./user-notes/user-notes"
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "./ui/dropdown-menu"
+import { useTheme } from "./theme-provider"
 
 const data = {
   user: {
@@ -223,38 +229,147 @@ export function AppSidebar({
   user,
   ...props
 }) {
+
+  const { setTheme, theme } = useTheme()
+
+  const logoutRenderer =
+    <DropdownMenuItem>
+      <LogOut />
+      Log out
+      <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+    </DropdownMenuItem>
+
+  const themeRenderer = <>
+    <DropdownMenuCheckboxItem
+      checked={theme === "light"}
+      onCheckedChange={() => setTheme("light")}
+    >
+      Light
+    </DropdownMenuCheckboxItem>
+
+    <DropdownMenuCheckboxItem
+      checked={theme === "dark"}
+      onCheckedChange={() => setTheme("dark")}
+    >
+      Dark
+    </DropdownMenuCheckboxItem>
+
+    <DropdownMenuCheckboxItem
+      checked={theme === "system"}
+      onCheckedChange={() => setTheme("system")}
+    >
+      System
+    </DropdownMenuCheckboxItem>
+  </>
+
   return (
-    (<Sidebar variant="inset" {...props}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div
-                  className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
-                >
-                  <IconAppleFilled className="size-6" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Second Brain</span>
-                  <span className="truncate text-xs">Knowledge Hub</span>
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <ScrollArea className="size-full">
-          <UserNotes user={user} />
-          {/* <NavMain items={data.navMain} /> */}
-          {/* <NavProjects projects={data.projects} />
-          <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
-        </ScrollArea>
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={user} />
-      </SidebarFooter>
-    </Sidebar>)
-  );
+    <div className="p-2">
+      <div className="flex justify-between items-center p-2 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent rounded-md">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className="flex items-center gap-2 cursor-pointer">
+              <Avatar className="h-5 w-5 rounded-md">
+                <AvatarImage src={user.avatar} alt={user.name} className="bg-primary dark:bg-primary rounded-md" />
+                <AvatarFallback className="bg-primary dark:bg-primary text-xs rounded-md text-white">{user.avatarFallback}</AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold">{user.name}</span>
+              </div>
+              <ChevronDown className="opacity-50 size-4" />
+            </div>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent className="w-56 ml-4 mt-1 rounded-lg">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {/* <DropdownMenuGroup>
+              <DropdownMenuItem>
+                Profile
+                <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                Billing
+                <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                Settings
+                <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                Keyboard shortcuts
+                <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem>Team</DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Invite users</DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem>Email</DropdownMenuItem>
+                    <DropdownMenuItem>Message</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>More...</DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+              <DropdownMenuItem>
+                New Team
+                <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>GitHub</DropdownMenuItem>
+            <DropdownMenuItem>Support</DropdownMenuItem>
+            <DropdownMenuItem disabled>API</DropdownMenuItem> */}
+
+            <DropdownMenuLabel>Appearance</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {themeRenderer}
+
+            <DropdownMenuSeparator />
+            {logoutRenderer}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <UserNotes user={user} />
+    </div>
+  )
+
+  // return (
+  //   (<Sidebar variant="inset" {...props}>
+  //     <SidebarHeader>
+  //       <SidebarMenu>
+  //         <SidebarMenuItem>
+  //           <SidebarMenuButton size="lg" asChild>
+  //             <a href="#">
+  //               <div
+  //                 className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
+  //               >
+  //                 <IconAppleFilled className="size-6" />
+  //               </div>
+  //               <div className="grid flex-1 text-left text-sm leading-tight">
+  //                 <span className="truncate font-semibold">Second Brain</span>
+  //                 <span className="truncate text-xs">Knowledge Hub</span>
+  //               </div>
+  //             </a>
+  //           </SidebarMenuButton>
+  //         </SidebarMenuItem>
+  //       </SidebarMenu>
+  //     </SidebarHeader>
+  //     <SidebarContent>
+  //       <ScrollArea className="size-full">
+  //         <UserNotes user={user} />
+  //         {/* <NavMain items={data.navMain} /> */}
+  //         {/* <NavProjects projects={data.projects} />
+  //         <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
+  //       </ScrollArea>
+  //     </SidebarContent>
+  //     <SidebarFooter>
+  //       <NavUser user={user} />
+  //     </SidebarFooter>
+  //   </Sidebar>)
+  // );
 }
