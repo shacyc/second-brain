@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva } from "class-variance-authority";
-import { PanelLeft, ChevronRight, ScrollText } from "lucide-react"
+import { PanelLeft, ChevronRight, ScrollText, PlusIcon } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -450,13 +450,13 @@ const SidebarMenuButton = React.forwardRef((
     tooltip,
     onClick,
     className,
+
     ...props
   },
   ref
 ) => {
   const Comp = asChild ? Slot : "button"
   const { isMobile, state } = useSidebar()
-
   const button = (
     <Comp
       ref={ref}
@@ -491,59 +491,7 @@ const SidebarMenuButton = React.forwardRef((
 })
 SidebarMenuButton.displayName = "SidebarMenuButton"
 
-const SidebarMenuNavLink = React.forwardRef((
-  {
-    asChild = false,
-    isActive = false,
-    variant = "default",
-    size = "default",
-    tooltip,
-    onClick,
-    className,
-    ...props
-  },
-  ref
-) => {
-  const { isMobile, state } = useSidebar()
-
-  const button = (
-    <NavLink
-      ref={ref}
-      data-sidebar="menu-button"
-      data-size={size}
-      data-active={isActive}
-      className={({ isActive }) => cn(
-        sidebarMenuButtonVariants({ variant, size }),
-        isActive ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground" : "",
-        className)}
-      onClick={onClick}
-      {...props} />
-  )
-
-  if (!tooltip) {
-    return button
-  }
-
-  if (typeof tooltip === "string") {
-    tooltip = {
-      children: tooltip,
-    }
-  }
-
-  return (
-    (<Tooltip>
-      <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent
-        side="right"
-        align="center"
-        hidden={state !== "collapsed" || isMobile}
-        {...tooltip} />
-    </Tooltip>)
-  );
-})
-SidebarMenuButton.displayName = "SidebarMenuButton"
-
-const SidebarMenuAction = React.forwardRef(({ className, asChild = false, showOnHover = false, position = "right", ...props }, ref) => {
+const SidebarMenuAction = React.forwardRef(({ className, asChild = false, showOnHover = false, position = "right", onClick, ...props }, ref) => {
   const Comp = asChild ? Slot : "button"
 
   return (
@@ -563,6 +511,7 @@ const SidebarMenuAction = React.forwardRef(({ className, asChild = false, showOn
         position === "right" && "absolute right-1",
         className
       )}
+      onClick={onClick}
       {...props} />)
   );
 })
@@ -653,32 +602,45 @@ const SidebarMenuSubButton = React.forwardRef(
 )
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton"
 
-const SidebarMenuGroup = React.forwardRef(({ title, items, ...props }, ref) => {
+const SidebarMenuGroup = React.forwardRef(({ title, items, itemActions, itemActionsHoverClassName, ...props }, ref) => {
 
   const MenuButtonRenderer = ({ item, children }) => {
     if (item.url && item.url !== "#") {
+
       return <NavLink
         to={item.url}
         className={({ isActive }) => cn(
           isActive && "[&>span]:bg-sidebar-accent [&>span]:font-medium [&>span]:text-sidebar-accent-foreground",
           "[&_.toggle-icon]:hover:block",
+          "[&_.menu-actions]:hover:flex",
           "[&_.note-icon]:hover:hidden",
+          "[&+button]:hidden",
+          itemActionsHoverClassName && `[&_.menu-button]:hover:${itemActionsHoverClassName}`
         )}
       >
-        <SidebarMenuButton size="sm" asChild tooltip={item.title}>
-          <span >
+        <SidebarMenuButton size="sm" asChild tooltip={item.title} className={cn(
+          "menu-button",
+          "group-has-[[data-sidebar=menu-action]]/menu-item:pr-2",
+        )}>
+          <span>
             <CollapsibleTrigger asChild>
               <SidebarMenuAction
-                className="[&_.toggle-icon]:data-[state=open]:rotate-90"
+                className="[&_.toggle-icon]:opacity-50 [&_.toggle-icon]:data-[state=open]:rotate-90"
                 position="left"
               >
                 <ChevronRight className="toggle-icon hidden" />
-                {item.icon ? <item.icon className="note-icon" /> : <ScrollText className="note-icon" />}
+                {item.icon ? <item.icon className="note-icon" /> : <ScrollText className="note-icon opacity-50" />}
                 <span className="sr-only">Toggle</span>
               </SidebarMenuAction>
             </CollapsibleTrigger>
+
             {/* {item.icon ? <item.icon /> : <ScrollText />} */}
-            <span>{item.title}</span>
+            <span>
+              {item.title}
+              <div className="menu-actions hidden absolute right-1 top-1 items-center gap-2">
+                {typeof itemActions === "function" ? itemActions(item) : itemActions}
+              </div>
+            </span>
           </span>
         </SidebarMenuButton>
       </NavLink>
@@ -693,25 +655,21 @@ const SidebarMenuGroup = React.forwardRef(({ title, items, ...props }, ref) => {
   }
 
   const renderItem = (item) =>
-    <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
+    <Collapsible key={item.id} asChild defaultOpen={item.isActive}>
       <SidebarMenuItem>
         <MenuButtonRenderer item={item}>
         </MenuButtonRenderer>
-        {item.items?.length ? (
-          <>
-            <CollapsibleTrigger asChild>
-              <SidebarMenuAction className="data-[state=open]:rotate-90">
-                <ChevronRight />
-                <span className="sr-only">Toggle</span>
-              </SidebarMenuAction>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <SidebarMenuSub>
-                {item.items?.map((subItem) => renderItem(subItem))}
-              </SidebarMenuSub>
-            </CollapsibleContent>
-          </>
-        ) : null}
+        <CollapsibleTrigger asChild>
+          <SidebarMenuAction className="data-[state=open]:rotate-90">
+            <ChevronRight />
+            <span className="sr-only">Toggle</span>
+          </SidebarMenuAction>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {item.items?.length ? item.items?.map((subItem) => renderItem(subItem)): "No items"}
+          </SidebarMenuSub>
+        </CollapsibleContent>
       </SidebarMenuItem>
     </Collapsible>
 

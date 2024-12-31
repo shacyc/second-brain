@@ -247,7 +247,7 @@ export function AppSidebar({
       <SidebarContent>
         <ScrollArea className="size-full">
           <UserNotes user={user} />
-          <NavMain items={data.navMain} />
+          {/* <NavMain items={data.navMain} /> */}
           {/* <NavProjects projects={data.projects} />
           <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
         </ScrollArea>
