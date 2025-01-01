@@ -107,13 +107,32 @@ export default function UserNotes({ user }) {
             menu={{
                 items: preparedUserNotes,
                 icon: ScrollText,
+                menuItemHoverClassName: "pr-12",
                 onClick: (item) => {
                     navigate(item.url);
-                }
+                },
+                actions: [{
+                    key: "more",
+                    icon: MoreHorizontal,
+                    onClick: (item) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                }, {
+                    key: "create",
+                    icon: PlusIcon,
+                    onClick: (item) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        createNote(item.id);
+                    }
+                }]
             }}
             childrenProperty="items"
             showEmptyChildren
+            emptyChildrenContent="No notes"
             indentSize="sm"
+            menuItemClassName="hover:pr-8"
         ></SidebarMenu>
     </>)
 

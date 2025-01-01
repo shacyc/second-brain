@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { cva } from "class-variance-authority";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./collapsible";
 import { ChevronRight } from "lucide-react";
+import { Fragment } from "react";
 
 /**
  * 
@@ -30,17 +31,18 @@ const SidebarSeparator = () => "separator";
  *          key: string
  *          title: string,
  *          icon: any,
- *          actions: [{
- *              key: string,
- *              tooltip: string,
- *              icon: any,
- *          }],
+ *      }],
+ *      actions: array | (item) => array: [{
+ *          key: string,
+ *          tooltip: string,
+ *          icon: any,
  *      }],
  *      onClick: function,
  *      variant: default | outline,
  *      size: default | sm | lg,
  *      className: string,
  *      icon: any,
+ *      menuItemHoverClassName: string,
  *  },
  *  className: string,
  *  showEmptyChildren: boolean = false,
@@ -50,7 +52,7 @@ const SidebarSeparator = () => "separator";
  */
 const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildrenContent = "No items", childrenProperty = "children", indentSize = "default" }) => {
 
-    const { items, variant, size, className: menuItemClassName, icon, onClick } = menu
+    const { items, variant, size, className: menuItemClassName, menuItemHoverClassName, icon, onClick, actions } = menu
 
     const sidebarMenuButtonVariants = cva(
         "flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 cursor-pointer dark:bg-sidebar dark:text-zinc-50 dark:hover:bg-sidebar-accent dark:hover:text-sidebar-accent-foreground dark:focus-visible:ring-zinc-300",
@@ -74,24 +76,45 @@ const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildren
         }
     )
 
+    const renderActions = (item) => {
+        let _actions = typeof actions === "function" ? actions(item) : actions;
+        if (_actions?.length) {
+            return <div
+                className={cn(
+                    "absolute right-2 top-0 flex gap-1 h-full items-center hidden menu-actions z-10",
+                )}
+            >
+                {_actions.map((action, index) => (<Fragment key={action.key || index}>
+                    <action.icon className="opacity-50 hover:opacity-80 hover:cursor-pointer size-4" onClick={() => action?.onClick(item, action.key)} />
+                </Fragment>))}
+            </div>
+        }
+    }
+
     const renderItem = (item, index) => {
         return (
-            <Collapsible key={item.id} asChild defaultOpen={item.isActive}>
-                <li className="group/menu-item relative" key={item.key || index}>
+            <Collapsible key={item.id || index} asChild defaultOpen={item.isActive}>
+                <li
+                    key={item.key || index}
+                >
                     <div
                         className={cn(sidebarMenuButtonVariants({ variant, size }),
+                            "relative menu-item",
+                            menuItemHoverClassName && (Array.isArray(menuItemClassName) ? menuItemClassName.map(m => `hover:${m}`).join(" ") : `hover:${menuItemHoverClassName}`),
                             "[&_.collapse-icon]:hover:block", // show the collapse icon when hovering
                             "[&_.item-icon]:hover:hidden", // hide the item icon when hovering
+                            "[&_.menu-actions]:hover:flex", // show the collapse icon when hovering
                             menuItemClassName
                         )}
                         onClick={() => onClick(item)}
                     >
+                        {renderActions(item)}
                         {(item[childrenProperty]?.length || showEmptyChildren) && (<>
                             <CollapsibleTrigger asChild>
-                                <ChevronRight className="data-[state=open]:rotate-90 collapse-icon hidden" />
+                                <ChevronRight className="data-[state=open]:rotate-90 collapse-icon hidden opacity-50 hover:opacity-80" />
                             </CollapsibleTrigger>
                         </>)}
-                        {item.icon ? <item.icon className="opacity-60 item-icon hidden" /> : (icon && <menu.icon className="opacity-60 item-icon" />)}
+                        {item.icon ? <item.icon className="opacity-50 item-icon hidden" /> : (icon && <menu.icon className="opacity-50 item-icon" />)}
                         <span>{item.title}</span>
                     </div>
                     <CollapsibleContent>
@@ -105,12 +128,9 @@ const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildren
                         >
                             {item[childrenProperty]?.length ? item[childrenProperty]?.map((subItem) => renderItem(subItem)) : <div className="opacity-50 flex p-0 m-0"><ChevronRight className="opacity-0" />{emptyChildrenContent}</div>}
                         </ul>
-                        {/* <SidebarMenuSub>
-                            {item.items?.length ? item.items?.map((subItem) => renderItem(subItem)) : "No items"}
-                        </SidebarMenuSub> */}
                     </CollapsibleContent>
                 </li>
-            </Collapsible>
+            </Collapsible >
         )
     }
 
@@ -119,7 +139,6 @@ const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildren
             <div className="w-full text-sm">
                 <ul className="flex w-full min-w-0 flex-col gap-1">
                     {items.map((item, index) => renderItem(item, index))}
-
                 </ul>
             </div>
         </div>
