@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { cva } from "class-variance-authority";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./collapsible";
 import { ChevronRight } from "lucide-react";
-import { Fragment } from "react";
+import { Fragment, useRef } from "react";
 
 /**
  * 
@@ -47,12 +47,12 @@ const SidebarSeparator = () => "separator";
  *  className: string,
  *  showEmptyChildren: boolean = false,
  *  emptyChildrenContent: string = "No items",
- *  indentSize: "default" | "sm",
+ *  variant: "default" | "notion",
  * }
  */
-const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildrenContent = "No items", childrenProperty = "children", indentSize = "default" }) => {
+const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildrenContent = "No items", childrenProperty = "children", variant = "default" }) => {
 
-    const { items, variant, size, className: menuItemClassName, menuItemHoverClassName, icon, onClick, actions } = menu
+    const { items, size, className: menuItemClassName, menuItemHoverClassName, icon, onClick, actions } = menu;
 
     const sidebarMenuButtonVariants = cva(
         "flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 cursor-pointer dark:bg-sidebar dark:text-zinc-50 dark:hover:bg-sidebar-accent dark:hover:text-sidebar-accent-foreground dark:focus-visible:ring-zinc-300",
@@ -76,6 +76,43 @@ const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildren
         }
     )
 
+    const prepareCn = () => {
+
+        let _cn = {
+            icon: "opacity-50 item-icon size-4 [&_svg]:size-4 [&_svg]:shrink-0",
+            subMenu: "",
+            menuItem: ""
+        }
+
+        switch (variant) {
+            case "notion":
+                _cn.icon = _cn.icon;
+                _cn.subMenu = "pl-2";
+                _cn.menuItem = cn(
+                    sidebarMenuButtonVariants({ variant: "default", size }),
+                    "relative menu-item",
+                    menuItemClassName,
+                    menuItemHoverClassName && (Array.isArray(menuItemHoverClassName) ? menuItemHoverClassName.map(m => `hover:${m}`).join(" ") : `hover:${menuItemHoverClassName}`),
+                    "[&_.collapse-icon]:hover:block", // show the collapse icon when hovering
+                    "[&_.item-icon]:hover:hidden", // hide the item icon when hovering
+                    "[&_.menu-actions]:hover:flex", // show the collapse icon when hovering
+                );
+                break;
+            default:
+                _cn.icon = _cn.icon;
+                _cn.subMenu = "ml-3.5 pl-2.5 border-l border-l-sidebar-border";
+                _cn.menuItem = cn(
+                    sidebarMenuButtonVariants({ variant: "default", size }),
+                    "relative menu-item",
+                    menuItemClassName
+                );
+                break;
+        }
+
+        return _cn;
+    }
+    const refCn = useRef(prepareCn())
+
     const renderActions = (item) => {
         let _actions = typeof actions === "function" ? actions(item) : actions;
         if (_actions?.length) {
@@ -85,7 +122,13 @@ const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildren
                 )}
             >
                 {_actions.map((action, index) => (<Fragment key={action.key || index}>
-                    <action.icon className="opacity-50 hover:opacity-80 hover:cursor-pointer size-4" onClick={() => action?.onClick(item, action.key)} />
+                    <action.icon
+                        className="opacity-50 hover:opacity-80 hover:cursor-pointer size-4"
+                        onClick={e => {
+                            e.stopPropagation();
+                            action?.onClick(item, action.key)
+                        }}
+                    />
                 </Fragment>))}
             </div>
         }
@@ -98,23 +141,34 @@ const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildren
                     key={item.key || index}
                 >
                     <div
-                        className={cn(sidebarMenuButtonVariants({ variant, size }),
+                        data-sidebar-menu-item={item.key || index}
+                        className={cn(sidebarMenuButtonVariants({ variant: "default", size }),
                             "relative menu-item",
-                            menuItemHoverClassName && (Array.isArray(menuItemClassName) ? menuItemClassName.map(m => `hover:${m}`).join(" ") : `hover:${menuItemHoverClassName}`),
-                            "[&_.collapse-icon]:hover:block", // show the collapse icon when hovering
-                            "[&_.item-icon]:hover:hidden", // hide the item icon when hovering
-                            "[&_.menu-actions]:hover:flex", // show the collapse icon when hovering
-                            menuItemClassName
+                            refCn.current.menuItem,
+                            // ...(variant === "notion" ? [
+                            //     menuItemHoverClassName && (Array.isArray(menuItemHoverClassName) ? menuItemHoverClassName.map(m => `hover:${m}`).join(" ") : `hover:${menuItemHoverClassName}`),
+                            //     "[&_.collapse-icon]:hover:block", // show the collapse icon when hovering
+                            //     "[&_.item-icon]:hover:hidden", // hide the item icon when hovering
+                            //     "[&_.menu-actions]:hover:flex", // show the collapse icon when hovering
+                            // ] : []),
+                            // menuItemClassName
                         )}
-                        onClick={() => onClick(item)}
+                        onClick={e => {
+                            e.stopPropagation();
+                            onClick?.(item);
+                        }}
                     >
                         {renderActions(item)}
                         {(item[childrenProperty]?.length || showEmptyChildren) && (<>
                             <CollapsibleTrigger asChild>
-                                <ChevronRight className="data-[state=open]:rotate-90 collapse-icon hidden opacity-50 hover:opacity-80" />
+                                <button className="data-[state=open]:rotate-90 collapse-icon hidden ">
+                                    <ChevronRight className="opacity-50 hover:opacity-80 size-4" />
+                                </button>
                             </CollapsibleTrigger>
                         </>)}
-                        {item.icon ? <item.icon className="opacity-50 item-icon hidden" /> : (icon && <menu.icon className="opacity-50 item-icon" />)}
+                        <button className={refCn.current.icon}>
+                            {item.icon ? <item.icon /> : (icon && <menu.icon />)}
+                        </button>
                         <span>{item.title}</span>
                     </div>
                     <CollapsibleContent>
@@ -122,7 +176,8 @@ const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildren
                             data-sidebar="menu-sub"
                             className={cn(
                                 " flex min-w-0 translate-x-px flex-col gap-1 border-r border-r-transparent py-0.5",
-                                indentSize === "sm" ? "pl-2" : "ml-3.5 pl-2.5 border-l border-l-sidebar-border",
+                                // indentSize === "sm" ? "pl-2" : "ml-3.5 pl-2.5 border-l border-l-sidebar-border",
+                                refCn.current.subMenu,
                                 "group-data-[collapsible=icon]:hidden",
                             )}
                         >

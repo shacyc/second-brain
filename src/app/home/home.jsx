@@ -1,5 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar"
-import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import {
   SidebarInset,
@@ -62,7 +62,7 @@ export default function Home({ user }) {
     }
   }
 
-  return (
+  return (<>
     <ResizablePanelGroup direction="horizontal" >
       <ResizablePanel
         minSize={0}
@@ -83,6 +83,8 @@ export default function Home({ user }) {
         </div>
       </ResizablePanel>
     </ResizablePanelGroup >
+    <Toaster />
+  </>
   )
 
   return (

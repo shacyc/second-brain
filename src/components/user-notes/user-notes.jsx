@@ -4,6 +4,7 @@ import { MoreHorizontal, PlusIcon, ScrollText, SquarePenIcon } from "lucide-reac
 import { CommonFunction } from "@/lib/common-function";
 import { useNavigate } from "react-router";
 import { SidebarMenu, SidebarTitle } from "../ui/sidebar-menu";
+import { toast } from "sonner"
 
 export default function UserNotes({ user }) {
     const [userNotes, setUserNotes] = useState(null);
@@ -53,20 +54,46 @@ export default function UserNotes({ user }) {
             }, { childrenProp: "items" });
         }
 
-        // update user note
-        let success = await firebase.services.userNotes.update(user.uid, { notes: _userNotes });
+        const promise = new Promise(async (resolve, reject) => {
+            try {
+                // update user note
+                let success = await firebase.services.userNotes.update(user.uid, { notes: _userNotes });
 
-        // create new note
-        if (success) {
-            success = await firebase.services.notes.create(id, {
-                uid: user.uid,
-            });
-        }
+                // create new note
+                if (success) {
+                    success = await firebase.services.notes.create(id, {
+                        uid: user.uid,
+                    });
+                }
 
-        if (success) {
-            setUserNotes(_userNotes);
-            navigate(`/${id}`);
-        }
+                if (success) {
+                    setUserNotes(_userNotes);
+                    navigate(`/${id}`);
+
+                    // expand node
+                    if (pId) {
+                        let el = document.querySelector(`[data-sidebar-menu-item="${pId}"] .collapse-icon`);
+                        if (el && el.dataset?.state === "closed") {
+                            el.click();
+                        }
+                    }
+
+                    resolve(true);
+                } else {
+                    reject(false);
+                }
+            } catch (error) {
+                console.error("Error creating note: ", error);
+                reject(error);
+            }
+
+        });
+
+        toast.promise(promise, {
+            loading: "Creating note...",
+            success: "Note created successfully!",
+            error: "Failed to create note."
+        })
 
     }
 
@@ -90,11 +117,16 @@ export default function UserNotes({ user }) {
                     key: "create-note",
                     title: "New note",
                     icon: SquarePenIcon,
-                    onClick: (e => {
-                        e.stopPropagation();
-                        createNote();
-                    })
                 }],
+                onClick: item => {
+                    switch (item.key) {
+                        case "create-note":
+                            createNote();
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }}
             className="mt-2"
         ></SidebarMenu>
@@ -115,15 +147,11 @@ export default function UserNotes({ user }) {
                     key: "more",
                     icon: MoreHorizontal,
                     onClick: (item) => {
-                        e.preventDefault();
-                        e.stopPropagation();
                     }
                 }, {
                     key: "create",
                     icon: PlusIcon,
                     onClick: (item) => {
-                        e.preventDefault();
-                        e.stopPropagation();
                         createNote(item.id);
                     }
                 }]
@@ -131,8 +159,7 @@ export default function UserNotes({ user }) {
             childrenProperty="items"
             showEmptyChildren
             emptyChildrenContent="No notes"
-            indentSize="sm"
-            menuItemClassName="hover:pr-8"
+            variant="notion"
         ></SidebarMenu>
     </>)
 

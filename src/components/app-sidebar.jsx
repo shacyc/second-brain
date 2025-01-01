@@ -263,26 +263,27 @@ export function AppSidebar({
   </>
 
   return (
-    <div className="p-2">
-      <div className="flex justify-between items-center p-2 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent rounded-md">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-2 cursor-pointer">
-              <Avatar className="h-5 w-5 rounded-md">
-                <AvatarImage src={user.avatar} alt={user.name} className="bg-primary dark:bg-primary rounded-md" />
-                <AvatarFallback className="bg-primary dark:bg-primary text-xs rounded-md text-white">{user.avatarFallback}</AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
+    <ScrollArea className="size-full">
+      <div className="p-2">
+        <div className="flex justify-between items-center p-2 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent rounded-md">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div className="flex items-center gap-2 cursor-pointer">
+                <Avatar className="h-5 w-5 rounded-md">
+                  <AvatarImage src={user.avatar} alt={user.name} className="bg-primary dark:bg-primary rounded-md" />
+                  <AvatarFallback className="bg-primary dark:bg-primary text-xs rounded-md text-white">{user.avatarFallback}</AvatarFallback>
+                </Avatar>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">{user.name}</span>
+                </div>
+                <ChevronDown className="opacity-50 size-4" />
               </div>
-              <ChevronDown className="opacity-50 size-4" />
-            </div>
-          </DropdownMenuTrigger>
+            </DropdownMenuTrigger>
 
-          <DropdownMenuContent className="w-56 ml-4 mt-1 rounded-lg">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {/* <DropdownMenuGroup>
+            <DropdownMenuContent className="w-56 ml-4 mt-1 rounded-lg">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {/* <DropdownMenuGroup>
               <DropdownMenuItem>
                 Profile
                 <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
@@ -324,18 +325,19 @@ export function AppSidebar({
             <DropdownMenuItem>Support</DropdownMenuItem>
             <DropdownMenuItem disabled>API</DropdownMenuItem> */}
 
-            <DropdownMenuLabel>Appearance</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {themeRenderer}
+              <DropdownMenuLabel>Appearance</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {themeRenderer}
 
-            <DropdownMenuSeparator />
-            {logoutRenderer}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuSeparator />
+              {logoutRenderer}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <UserNotes user={user} />
       </div>
-
-      <UserNotes user={user} />
-    </div>
+    </ScrollArea>
   )
 
   // return (
