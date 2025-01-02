@@ -9,6 +9,7 @@ import { CommonFunction } from "@/lib/common-function";
 
 import { createRef, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet } from "react-router";
+import Cursor from "@/components/ui/cursor/cursor";
 
 export default function Home({ user }) {
 
@@ -52,7 +53,6 @@ export default function Home({ user }) {
   }, []);
 
   const toggleSidebar = () => {
-    debugger
     if (refSidebar.current.collapsed) {
       refSidebar.current.component.current.resize(refSidebar.current.size);
       refSidebar.current.collapsed = false;
@@ -84,28 +84,6 @@ export default function Home({ user }) {
       </ResizablePanel>
     </ResizablePanelGroup >
     <Toaster />
-  </>
-  )
-
-  return (
-    (<SidebarProvider>
-      <ResizablePanelGroup direction="horizontal" >
-        <ResizablePanel minSize={5} maxSize={50} defaultSize={15}>
-          <AppSidebar user={preparedUser} />
-        </ResizablePanel>
-        <ResizableHandle />
-        <ResizablePanel defaultSize={85}>
-          <SidebarInset>
-            <Outlet />
-          </SidebarInset>
-        </ResizablePanel>
-      </ResizablePanelGroup>
-
-      {/* <AppSidebar user={preparedUser} />
-      <SidebarInset>
-        <Outlet />
-      </SidebarInset> */}
-
-    </SidebarProvider>)
-  );
+    <Cursor variant={localStorage.getItem("cursor-variant") || "canvas"} />
+  </>)
 }

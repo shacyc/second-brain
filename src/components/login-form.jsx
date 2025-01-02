@@ -12,6 +12,7 @@ export function LoginForm({
   loginWithEmail = false,
   loginWithGoogle = true,
   loginWithApple = false,
+  more,
   ...props
 }) {
 
@@ -99,7 +100,7 @@ export function LoginForm({
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Login to your second brain</h1>
         <p className="text-balance text-sm text-zinc-500 dark:text-zinc-400">
-          Login with your Apple or Google account
+          Login with your {loginWithApple && "Apple or"} Google account
         </p>
       </div>
       <div className="grid gap-6">
@@ -108,6 +109,8 @@ export function LoginForm({
         {loginWithApple && renderLoginWithApple}
 
         {loginWithGoogle && renderLoginWithGoogle}
+
+        {typeof more === "function" ? more() : more}
 
       </div>
 

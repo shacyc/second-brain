@@ -91,21 +91,21 @@ const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildren
                 _cn.menuItem = cn(
                     sidebarMenuButtonVariants({ variant: "default", size }),
                     "relative menu-item",
-                    menuItemClassName,
-                    menuItemHoverClassName && (Array.isArray(menuItemHoverClassName) ? menuItemHoverClassName.map(m => `hover:${m}`).join(" ") : `hover:${menuItemHoverClassName}`),
                     "[&_.collapse-icon]:hover:block", // show the collapse icon when hovering
                     "[&_.item-icon]:hover:hidden", // hide the item icon when hovering
                     "[&_.menu-actions]:hover:flex", // show the collapse icon when hovering
+                    menuItemClassName,
+                    menuItemHoverClassName && (Array.isArray(menuItemHoverClassName) ? menuItemHoverClassName.map(m => `hover:${m}`).join(" ") : `hover:${menuItemHoverClassName}`),
                 );
                 break;
             default:
                 _cn.icon = _cn.icon;
                 _cn.subMenu = "ml-3.5 pl-2.5 border-l border-l-sidebar-border";
-                _cn.menuItem = cn(
+                _cn.menuItem = [
                     sidebarMenuButtonVariants({ variant: "default", size }),
                     "relative menu-item",
                     menuItemClassName
-                );
+                ];
                 break;
         }
 
@@ -142,17 +142,16 @@ const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildren
                 >
                     <div
                         data-sidebar-menu-item={item.key || index}
-                        className={cn(sidebarMenuButtonVariants({ variant: "default", size }),
-                            "relative menu-item",
-                            refCn.current.menuItem,
+                        className={
+                            refCn.current.menuItem
                             // ...(variant === "notion" ? [
-                            //     menuItemHoverClassName && (Array.isArray(menuItemHoverClassName) ? menuItemHoverClassName.map(m => `hover:${m}`).join(" ") : `hover:${menuItemHoverClassName}`),
+                            //     menuItemHoverClassName && (Array.isArray(menuItemHoverClassName) ? menuItemHoverClassName.map(m => `hover:!${m}`).join(" ") : `hover:!${menuItemHoverClassName}`),
                             //     "[&_.collapse-icon]:hover:block", // show the collapse icon when hovering
                             //     "[&_.item-icon]:hover:hidden", // hide the item icon when hovering
                             //     "[&_.menu-actions]:hover:flex", // show the collapse icon when hovering
                             // ] : []),
                             // menuItemClassName
-                        )}
+                        }
                         onClick={e => {
                             e.stopPropagation();
                             onClick?.(item);
@@ -169,7 +168,7 @@ const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildren
                         <button className={refCn.current.icon}>
                             {item.icon ? <item.icon /> : (icon && <menu.icon />)}
                         </button>
-                        <span>{item.title}</span>
+                        <span className="menu-item-title">{item.title}</span>
                     </div>
                     <CollapsibleContent>
                         <ul

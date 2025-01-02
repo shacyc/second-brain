@@ -7,10 +7,12 @@ import {
   LifeBuoy,
   LogOut,
   Map,
+  MousePointerClick,
   PieChart,
   Send,
   Settings2,
   SquareTerminal,
+  Wand2,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -34,6 +36,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "./ui/dropdown-menu"
 import { useTheme } from "./theme-provider"
 import { firebase } from "@/firebase/firebase"
+import { CommonFunction } from "@/lib/common-function"
 
 const data = {
   user: {
@@ -232,6 +235,16 @@ export function AppSidebar({
 }) {
 
   const { setTheme, theme } = useTheme()
+  const [cursor, setCursor] = React.useState(localStorage.getItem("cursor-variant") || "default")
+
+  const changeCursor = (variant) => {
+    if (cursor !== variant) {
+      // save to local storage
+      localStorage.setItem("cursor-variant", variant)
+      setCursor(variant)
+      CommonFunction.eventBus.dispatch("change-cursor", variant);
+    }
+  }
 
   const logoutRenderer =
     <DropdownMenuItem onClick={firebase.logout}>
@@ -240,28 +253,74 @@ export function AppSidebar({
       <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
     </DropdownMenuItem>
 
-  const themeRenderer = <>
-    <DropdownMenuCheckboxItem
-      checked={theme === "light"}
-      onCheckedChange={() => setTheme("light")}
-    >
-      Light
-    </DropdownMenuCheckboxItem>
+  const themeRenderer = <DropdownMenuSub>
+    <DropdownMenuSubTrigger>
+      <Wand2 />
+      Theme
+    </DropdownMenuSubTrigger>
+    <DropdownMenuPortal>
+      <DropdownMenuSubContent>
+        <DropdownMenuCheckboxItem
+          checked={theme === "light"}
+          onCheckedChange={() => setTheme("light")}
+        >
+          Light
+        </DropdownMenuCheckboxItem>
 
-    <DropdownMenuCheckboxItem
-      checked={theme === "dark"}
-      onCheckedChange={() => setTheme("dark")}
-    >
-      Dark
-    </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={theme === "dark"}
+          onCheckedChange={() => setTheme("dark")}
+        >
+          Dark
+        </DropdownMenuCheckboxItem>
 
-    <DropdownMenuCheckboxItem
-      checked={theme === "system"}
-      onCheckedChange={() => setTheme("system")}
-    >
-      System
-    </DropdownMenuCheckboxItem>
-  </>
+        <DropdownMenuCheckboxItem
+          checked={theme === "system"}
+          onCheckedChange={() => setTheme("system")}
+        >
+          System
+        </DropdownMenuCheckboxItem>
+      </DropdownMenuSubContent>
+    </DropdownMenuPortal>
+  </DropdownMenuSub>
+
+  const cursorRenderer = <DropdownMenuSub>
+    <DropdownMenuSubTrigger>
+      <MousePointerClick />
+      Cursor
+    </DropdownMenuSubTrigger>
+    <DropdownMenuPortal>
+      <DropdownMenuSubContent>
+        <DropdownMenuCheckboxItem
+          checked={cursor === "canvas"}
+          onCheckedChange={() => changeCursor("canvas")}
+        >
+          Canvas
+        </DropdownMenuCheckboxItem>
+
+        <DropdownMenuCheckboxItem
+          checked={cursor === "animated"}
+          onCheckedChange={() => changeCursor("animated")}
+        >
+          Animated
+        </DropdownMenuCheckboxItem>
+
+        <DropdownMenuCheckboxItem
+          checked={cursor === "donut"}
+          onCheckedChange={() => changeCursor("donut")}
+        >
+          Donut
+        </DropdownMenuCheckboxItem>
+
+        <DropdownMenuCheckboxItem
+          checked={cursor === "default"}
+          onCheckedChange={() => changeCursor("default")}
+        >
+          Default
+        </DropdownMenuCheckboxItem>
+      </DropdownMenuSubContent>
+    </DropdownMenuPortal>
+  </DropdownMenuSub>
 
   return (
     <ScrollArea className="size-full">
@@ -329,6 +388,7 @@ export function AppSidebar({
               <DropdownMenuLabel>Appearance</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {themeRenderer}
+              {cursorRenderer}
 
               <DropdownMenuSeparator />
               {logoutRenderer}
