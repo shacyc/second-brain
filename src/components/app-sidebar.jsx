@@ -33,6 +33,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "./ui/dropdown-menu"
 import { useTheme } from "./theme-provider"
+import { firebase } from "@/firebase/firebase"
 
 const data = {
   user: {
@@ -233,7 +234,7 @@ export function AppSidebar({
   const { setTheme, theme } = useTheme()
 
   const logoutRenderer =
-    <DropdownMenuItem>
+    <DropdownMenuItem onClick={firebase.logout}>
       <LogOut />
       Log out
       <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
