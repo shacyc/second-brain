@@ -77,8 +77,8 @@ export default function Home({ user }) {
         <AppSidebar user={preparedUser} />
       </ResizablePanel>
       <ResizableHandle />
-      <ResizablePanel defaultSize={85} className="bg-sidebar h-full">
-        <div className="m-2 ml-0 min-h-[calc(100svh-theme(spacing.4))] bg-background rounded-xl" >
+      <ResizablePanel defaultSize={85} className="bg-sidebar">
+        <div className="m-2 ml-0 h-[calc(100%-theme(spacing.4))] bg-background rounded-xl" >
           <Outlet />
         </div>
       </ResizablePanel>
