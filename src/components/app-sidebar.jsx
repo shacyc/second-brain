@@ -36,7 +36,7 @@ export function AppSidebar({
     <DropdownMenuItem onClick={firebase.logout}>
       <LogOut />
       Log out
-      <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+      {/* <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut> */}
     </DropdownMenuItem>
 
   const themeRenderer = <DropdownMenuSub>
