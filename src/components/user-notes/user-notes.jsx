@@ -13,8 +13,8 @@ export default function UserNotes({ user }) {
     useEffect(() => {
         const fetchUserNotes = async () => {
             const _userNotes = await firebase.services.userNotes.get(user.uid);
-            if (_userNotes?.notes) {
-                setUserNotes(_userNotes.notes);
+            if (_userNotes?.struct) {
+                setUserNotes(_userNotes);
             } else {
                 console.error("Error fetching user notes");
             }
@@ -35,9 +35,95 @@ export default function UserNotes({ user }) {
      */
     const createNote = async (pId) => {
         let id = CommonFunction.generateId();
+        const _userNotes = structuredClone(userNotes || {});
+
+        let _notePath = "",
+            defaultStructNote = {},
+            defaultNote = {};
+
+        if (pId) {
+            // push new note to struct
+            _userNotes.struct = CommonFunction.recursive(_userNotes.struct, (note, parentNote, breakFn, _noteKey) => {
+                if (!parentNote) {
+                    _notePath = _noteKey;
+                } else {
+                    _notePath = `${_notePath}.items.${_noteKey}`;
+                }
+
+                if (_noteKey === pId) {
+                    if (!note.items) note.items = {};
+                    note.items[id] = defaultStructNote;
+                    breakFn();
+                }
+                return note;
+            }, { childrenProp: "items", childrenType: "object" });
+
+            // push new note to notes
+            _userNotes.notes[id] = defaultNote;
+
+        } else {
+            // push new note to struct
+            _userNotes.struct[id] = defaultStructNote;
+
+            // push new note to notes
+            _userNotes.notes[id] = defaultNote;
+        }
+
+        const promise = new Promise(async (resolve, reject) => {
+            try {
+                // update user note
+                let _params = {
+                    [`struct${_notePath ? `.${_notePath}.items` : ""}.${id}`]: defaultStructNote,
+                    [`notes.${id}`]: defaultNote
+                }
+                let success = await firebase.services.userNotes.update(user.uid, _params);
+
+                // create new note
+                if (success) {
+                    success = await firebase.services.notes.create(id, {
+                        uid: user.uid,
+                    });
+                }
+
+                if (success) {
+                    setUserNotes(_userNotes);
+                    navigate(`/${id}`);
+
+                    // expand node
+                    if (pId) {
+                        let el = document.querySelector(`[data-sidebar-menu-item="${pId}"] .collapse-icon`);
+                        if (el && el.dataset?.state === "closed") {
+                            el.click();
+                        }
+                    }
+
+                    resolve(true);
+                } else {
+                    reject(false);
+                }
+            } catch (error) {
+                console.error("Error creating note: ", error);
+                reject(error);
+            }
+
+        });
+
+        toast.promise(promise, {
+            loading: "Creating note...",
+            success: "Note created successfully!",
+            error: "Failed to create note."
+        })
+
+    }
+    /**
+     * create a new note
+     * @param {*} pId parent id
+     */
+    const createNote1 = async (pId) => {
+        let id = CommonFunction.generateId();
         let _newNote = { id, note: {} };
 
-        const _userNotes = structuredClone(userNotes || []);
+        const _userNotes = structuredClone(userNotes || {});
         if (!pId) {
             _userNotes.push(_newNote);
         } else {
@@ -100,14 +186,14 @@ export default function UserNotes({ user }) {
     const preparedUserNotes = useMemo(() => {
         if (!userNotes) return null;
 
-        let _userNotes = structuredClone(userNotes);
-        _userNotes = CommonFunction.recursive(_userNotes, (note, parentNote, breakFn) => {
-            if (!note.title) note.title = "New note New note New note New note New note";
-            note.key = note.id;
-            note.url = `/${note.id}`;
-            return note;
-        }, { childrenProp: "items" });
-        return _userNotes;
+        let _notes = structuredClone(userNotes.struct);
+        _notes = CommonFunction.recursive(_notes, (_note, parentNote, breakFn, _noteKey) => {
+            if (!_note.title) _note.title = "New note";
+            _note.key = _noteKey;
+            _note.url = `/${_noteKey}`;
+            return _note;
+        }, { childrenProp: "items", childrenType: "object" });
+        return _notes;
     }, [userNotes]);
 
     return userNotes && (<>
@@ -132,7 +218,7 @@ export default function UserNotes({ user }) {
         ></SidebarMenu>
 
         <SidebarTitle>
-            {userNotes.length > 0 ? "Notes" : "No notes"}
+            {Object.keys(userNotes.struct).length > 0 ? "Notes" : "No notes"}
         </SidebarTitle>
 
         <SidebarMenu
@@ -152,7 +238,7 @@ export default function UserNotes({ user }) {
                     key: "create",
                     icon: PlusIcon,
                     onClick: (item) => {
-                        createNote(item.id);
+                        createNote(item.key);
                     }
                 }]
             }}
@@ -162,62 +248,4 @@ export default function UserNotes({ user }) {
             variant="notion"
         ></SidebarMenu>
     </>)
-
-    // return userNotes && (<>
-    //     <SidebarGroup>
-    //         <SidebarGroupContent>
-    //             <SidebarMenu>
-    //                 {[
-    //                     {
-    //                         title: "Create a new note",
-    //                         url: "#",
-    //                         icon: SquarePenIcon,
-    //                         onClick: (e => {
-    //                             e.stopPropagation();
-    //                             createNote();
-    //                         })
-    //                     },
-
-    //                 ].map((item) => (
-    //                     <SidebarMenuItem key={item.title}>
-    //                         <SidebarMenuButton asChild size="sm" onClick={item.onClick}>
-    //                             <a href={item.url}>
-    //                                 {item.icon && <item.icon />}
-    //                                 <span>{item.title}</span>
-    //                             </a>
-    //                         </SidebarMenuButton>
-    //                     </SidebarMenuItem>
-    //                 ))}
-    //             </SidebarMenu>
-    //         </SidebarGroupContent>
-    //     </SidebarGroup>
-
-    //     <SidebarMenuGroup
-    //         title={userNotes.length > 0 ? "Notes" : "No notes"}
-    //         items={preparedUserNotes}
-    //         itemActionsHoverClassName="pr-14"
-    //         itemActions={(item) => <>
-    //             <SidebarMenuAction
-    //                 position="left"
-    //                 onClick={(e) => {
-    //                     e.preventDefault();
-    //                     e.stopPropagation();
-    //                 }}
-    //             >
-    //                 <MoreHorizontal className="opacity-50" />
-    //             </SidebarMenuAction>
-    //             <SidebarMenuAction
-    //                 position="left"
-    //                 onClick={(e) => {
-    //                     e.preventDefault();
-    //                     e.stopPropagation();
-    //                     createNote(item.id);
-    //                 }}
-    //             >
-    //                 <PlusIcon className="opacity-50" />
-    //             </SidebarMenuAction>
-    //         </>}
-    //     />
-
-    // </>);
 }

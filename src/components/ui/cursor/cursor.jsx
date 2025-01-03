@@ -25,9 +25,9 @@ export default function Cursor({ variant }) {
             // save to local storage
             localStorage.setItem("cursor-variant", newVariant);
 
-            if (refAnimated.current) {
-                refAnimated.current.reset(newVariant);
-            }
+            // if (refAnimated.current) {
+            //     refAnimated.current.reset(newVariant);
+            // }
 
             // update state
             setTimeout(() => {

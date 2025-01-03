@@ -76,7 +76,7 @@ export default function Home({ user }) {
       >
         <AppSidebar user={preparedUser} />
       </ResizablePanel>
-      <ResizableHandle />
+      <ResizableHandle className="opacity-0" />
       <ResizablePanel defaultSize={85} className="bg-sidebar">
         <div className="m-2 ml-0 h-[calc(100%-theme(spacing.4))] bg-background rounded-xl" >
           <Outlet />

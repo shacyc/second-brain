@@ -33,23 +33,66 @@ class CommonFunctionClass {
     }
 
     recursive = (nodes, fn, options) => {
+        let params = { nodes, fn, childrenProp: options?.childrenProp || "children" };
+        switch (options?.childrenType || "array") {
+            case "object":
+                nodes = this.recursiveObject(params);
+                break;
+            default:
+                nodes = this.recursiveArray(params);
+                break;
+        }
+
+        return nodes;
+    }
+
+    recursiveObject = ({ nodes, fn, childrenProp }) => {
         let _break = false;
-        let _childrenProp = options?.childrenProp || "children";
 
         // break function
         let breakFn = () => {
             _break = true;
         }
 
-        // recursive function
+        let recursiveFn = (el, parentEl, elKey) => {
+            let modifiedEl = fn?.(el, parentEl, breakFn, elKey);
+            if (modifiedEl) el = modifiedEl;
+
+            if (el[childrenProp] && Object.keys(el[childrenProp]).length > 0) {
+                for (let key in el[childrenProp]) {
+                    if (_break) break;
+                    recursiveFn(el[childrenProp][key], el, key);
+                }
+            }
+        }
+
+        // loop
+        if (nodes && Object.keys(nodes).length > 0) {
+            for (let rootKey in nodes) {
+                if (_break) break;
+                recursiveFn(nodes[rootKey], null, rootKey);
+            }
+        }
+
+        return nodes
+    }
+
+    recursiveArray = ({ nodes, fn, childrenProp }) => {
+        let _break = false;
+
+        // break function
+        let breakFn = () => {
+            _break = true;
+        }
+
         let recursiveFn = (el, parentEl, index) => {
             let modifiedEl = fn?.(el, parentEl, breakFn, index);
             if (modifiedEl) el = modifiedEl;
 
-            if (el[_childrenProp]?.length > 0) {
-                for (let i = 0; i < el[_childrenProp].length; i++) {
+            if (el[childrenProp]?.length > 0) {
+                for (let i = 0; i < el[childrenProp].length; i++) {
                     if (_break) break;
-                    recursiveFn(el[_childrenProp][i], el, i);
+                    recursiveFn(el[childrenProp][i], el, i);
                 }
             }
         }
@@ -60,7 +103,7 @@ class CommonFunctionClass {
             recursiveFn(nodes[rootIndex], null, rootIndex);
         }
 
-        return nodes;
+        return nodes
     }
 }
 

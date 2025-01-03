@@ -67,7 +67,8 @@ export class FirebaseService {
         init: async (uid) => {
 
             let _data = {
-                notes: []
+                struct: {},
+                notes: {}
             };
 
             let success = await this.create(databaseStructure.tables.userNotes, uid, _data);

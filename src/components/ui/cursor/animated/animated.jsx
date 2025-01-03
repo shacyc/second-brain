@@ -1,8 +1,9 @@
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import AnimatedCursor from "react-animated-cursor"
 // import "./css/animated.css"
 
 export default forwardRef(function Aminated({ variant }, ref) {
+    const [cursorVariant, setCursorVariant] = useState(variant);
 
     useImperativeHandle(ref, () => ({
         reset: () => {
@@ -11,6 +12,10 @@ export default forwardRef(function Aminated({ variant }, ref) {
             }, 200);
         }
     }));
+
+    useEffect(() => {
+        setCursorVariant(variant);
+    }, [variant]);
 
     const renderCursor = () => {
         const clickables = [
@@ -30,7 +35,7 @@ export default forwardRef(function Aminated({ variant }, ref) {
             }
         ]
 
-        switch (variant) {
+        switch (cursorVariant) {
             case "donut":
                 return <AnimatedCursor
                     innerSize={8}

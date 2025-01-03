@@ -134,7 +134,25 @@ const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildren
         }
     }
 
+    const renderEmptySubItem = () =>
+        <div className="opacity-50 flex p-0 m-0"><ChevronRight className="opacity-0" />{emptyChildrenContent}</div>
+
+    const renderSubItem = (item) => {
+        let _subItems = item[childrenProperty];
+        switch (Array.isArray(_subItems) ? "array" : typeof _subItems) {
+            case "object":
+                return Object.keys(_subItems)?.length ? Object.keys(_subItems)?.map(key => renderItem(item[childrenProperty][key], key)) : renderEmptySubItem()
+            case "array":
+                return _subItems?.length ? _subItems?.map((subItem) => renderItem(subItem, index)) : renderEmptySubItem()
+            default:
+                break;
+        }
+
+        return null
+    }
+
     const renderItem = (item, index) => {
+
         return (
             <Collapsible key={item.id || index} asChild defaultOpen={item.isActive}>
                 <li
@@ -144,13 +162,6 @@ const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildren
                         data-sidebar-menu-item={item.key || index}
                         className={
                             refCn.current.menuItem
-                            // ...(variant === "notion" ? [
-                            //     menuItemHoverClassName && (Array.isArray(menuItemHoverClassName) ? menuItemHoverClassName.map(m => `hover:!${m}`).join(" ") : `hover:!${menuItemHoverClassName}`),
-                            //     "[&_.collapse-icon]:hover:block", // show the collapse icon when hovering
-                            //     "[&_.item-icon]:hover:hidden", // hide the item icon when hovering
-                            //     "[&_.menu-actions]:hover:flex", // show the collapse icon when hovering
-                            // ] : []),
-                            // menuItemClassName
                         }
                         onClick={e => {
                             e.stopPropagation();
@@ -170,29 +181,43 @@ const SidebarMenu = ({ menu, className, showEmptyChildren = false, emptyChildren
                         </button>
                         <span className="menu-item-title">{item.title}</span>
                     </div>
-                    <CollapsibleContent>
-                        <ul
-                            data-sidebar="menu-sub"
-                            className={cn(
-                                " flex min-w-0 translate-x-px flex-col gap-1 border-r border-r-transparent py-0.5",
-                                // indentSize === "sm" ? "pl-2" : "ml-3.5 pl-2.5 border-l border-l-sidebar-border",
-                                refCn.current.subMenu,
-                                "group-data-[collapsible=icon]:hidden",
-                            )}
-                        >
-                            {item[childrenProperty]?.length ? item[childrenProperty]?.map((subItem) => renderItem(subItem)) : <div className="opacity-50 flex p-0 m-0"><ChevronRight className="opacity-0" />{emptyChildrenContent}</div>}
-                        </ul>
-                    </CollapsibleContent>
+                    {item[childrenProperty] &&
+                        <CollapsibleContent>
+                            <ul
+                                data-sidebar="menu-sub"
+                                className={cn(
+                                    " flex min-w-0 translate-x-px flex-col gap-1 border-r border-r-transparent py-0.5",
+                                    // indentSize === "sm" ? "pl-2" : "ml-3.5 pl-2.5 border-l border-l-sidebar-border",
+                                    refCn.current.subMenu,
+                                    "group-data-[collapsible=icon]:hidden",
+                                )}
+                            >
+                                {renderSubItem(item)}
+                            </ul>
+                        </CollapsibleContent>
+                    }
                 </li>
-            </Collapsible >
+            </Collapsible>
         )
+    }
+
+    const renderRootItems = () => {
+        let _type = Array.isArray(items) ? "array" : typeof items;
+        switch (typeof items) {
+            case "object":
+                return Object.keys(items).map((key, index) => renderItem(items[key], index))
+            case "array":
+                return items.map((item, index) => renderItem(item, index))
+            default:
+                return `Invalid items type: ${_type}`
+        }
     }
 
     return (
         <div className={cn("relative flex w-full min-w-0 flex-col", className)}>
             <div className="w-full text-sm">
                 <ul className="flex w-full min-w-0 flex-col gap-1">
-                    {items.map((item, index) => renderItem(item, index))}
+                    {renderRootItems()}
                 </ul>
             </div>
         </div>
