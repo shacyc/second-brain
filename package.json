@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build --base=./second-brain",
+    "build": "vite build --base=./",
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy": "gh-pages -d dist"
